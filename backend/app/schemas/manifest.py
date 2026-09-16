@@ -95,6 +95,8 @@ class BolSegment(BaseModel):
     shipping_marks: str = ""
     goods_description: str = ""
     vins: list[str] = Field(default_factory=list)
+    vehicle_make: str = ""
+    vehicle_models: list[str] = Field(default_factory=list)
 
     freight_value: float | None = None
     freight_currency: str = "USD"

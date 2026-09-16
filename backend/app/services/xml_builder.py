@@ -93,7 +93,15 @@ def _bol_block(bol: BolSegment) -> list[str]:
         "",
     ]
     for vin in bol.vins:
-        lines += ["    <Vehicle_segment>", tag("Vin", vin, "      "), "    </Vehicle_segment>"]
+        vehicle_lines = ["    <Vehicle_segment>", tag("Vin", vin, "      ")]
+        if bol.vehicle_make:
+            vehicle_lines.append(tag("Make", bol.vehicle_make, "      "))
+        if len(bol.vehicle_models) == 1:
+            vehicle_lines.append(tag("Model", bol.vehicle_models[0], "      "))
+        elif bol.vehicle_models:
+            vehicle_lines.append(tag("Model", ", ".join(bol.vehicle_models), "      "))
+        vehicle_lines.append("    </Vehicle_segment>")
+        lines += vehicle_lines
     if bol.vins:
         lines.append("")
     lines += [

@@ -34,6 +34,9 @@ RATE_RE = re.compile(r"/\s*(M3|RT|W/M|UNIT|CBM)", re.I)
 CURRENCY_RE = re.compile(r"\b(USD|EUR|JPY|ZAR|MGA)\b")
 PREPAID_RE = re.compile(r"PREPAID\s*AT\s*:?\s*(.*)$", re.I)
 VIN_MARKER_RE = re.compile(r"^VIN\s*(NO\.?|NUMBER|:)?\s*:?$", re.I)
+VEHICLE_MAKE_RE = re.compile(r"([A-Z]+)\s+VEHICLES?", re.I)
+MODEL_SECTION_RE = re.compile(r"MODEL\s*UNIT\(S\)", re.I)
+MODEL_CODE_RE = re.compile(r"\b([A-Z0-9]{4,}-?[A-Z0-9]{1,})\b")
 
 GRAND_BAND = 16.0  # hauteur, en points, de la bande « GRAND TOTAL »
 
@@ -65,6 +68,29 @@ class Charge:
     collect: bool = False
 
 
+def _extract_vehicle_info(goods_lines: list[str]) -> tuple[str, list[str]]:
+    make = ""
+    models: list[str] = []
+    for line in goods_lines:
+        if not make:
+            match = VEHICLE_MAKE_RE.search(line)
+            if match:
+                make = match.group(1).upper()
+        if not MODEL_SECTION_RE.search(line):
+            continue
+        for next_line in goods_lines[goods_lines.index(line) + 1 :]:
+            if re.fullmatch(r"[-\s]+", next_line) or not next_line.strip():
+                continue
+            match = MODEL_CODE_RE.search(next_line)
+            if match:
+                code = match.group(1)
+                if code not in models:
+                    models.append(code)
+            else:
+                break
+    return make, models
+
+
 @dataclass
 class PageResult:
     head: dict = field(default_factory=dict)
@@ -85,6 +111,8 @@ class PageResult:
     prepaid_at: str | None = None
     currency: str | None = None
     grand: dict = field(default_factory=dict)
+    vehicle_make: str = ""
+    vehicle_models: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -106,6 +134,8 @@ class RawBol:
     charges: list[Charge] = field(default_factory=list)
     prepaid_at: str | None = None
     currency: str | None = None
+    vehicle_make: str = ""
+    vehicle_models: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -256,6 +286,8 @@ def parse_page(page: Page) -> PageResult:
                 result.vins.append(vin)
         result.goods_lines.append(text)
 
+    result.vehicle_make, result.vehicle_models = _extract_vehicle_info(result.goods_lines)
+
     # --- colonnes chiffrées ---
     right_words = [w for w in body_words if w.x >= 260]
     for row in cluster_rows(right_words):
@@ -361,6 +393,8 @@ def parse_manifest(pages: list[Page]) -> RawManifest:
                 loading_port=result.head.get("port_of_loading", ""),
                 discharge_port=result.head.get("port_of_discharge", ""),
                 delivery_port=result.head.get("place_of_delivery", ""),
+                vehicle_make=result.vehicle_make,
+                vehicle_models=list(result.vehicle_models),
             )
             manifest.bols.append(current)
         if current is None:
@@ -373,6 +407,11 @@ def parse_manifest(pages: list[Page]) -> RawManifest:
         for vin in result.vins:
             if vin not in current.vins:
                 current.vins.append(vin)
+        if result.vehicle_make and not current.vehicle_make:
+            current.vehicle_make = result.vehicle_make
+        for model in result.vehicle_models:
+            if model not in current.vehicle_models:
+                current.vehicle_models.append(model)
         if result.unit_count is not None:
             current.packages = result.unit_count
         if result.total_units is not None:
