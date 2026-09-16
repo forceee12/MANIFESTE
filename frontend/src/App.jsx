@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import BolList from './components/BolList';
 import ChecksPanel from './components/ChecksPanel';
 import FileDrop from './components/FileDrop';
@@ -10,6 +12,7 @@ import { useManifest } from './hooks/useManifest';
 export default function App() {
   const manifest = useManifest();
   const { status, model, options } = manifest;
+  const [selectedBolIndex, setSelectedBolIndex] = useState(0);
 
   return (
     <>
@@ -49,7 +52,12 @@ export default function App() {
               source={model.source}
               onChange={manifest.updateGeneral}
             />
-            <BolList bols={model.bols} onChange={manifest.updateBol} />
+            <BolList
+              bols={model.bols}
+              onChange={manifest.updateBol}
+              selectedIndex={selectedBolIndex}
+              onSelect={setSelectedBolIndex}
+            />
             <ChecksPanel issues={manifest.issues} />
             <XmlPanel
               xml={manifest.xml}

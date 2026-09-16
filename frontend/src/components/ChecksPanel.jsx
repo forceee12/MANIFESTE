@@ -1,6 +1,16 @@
-/** Liste des contrôles avant dépôt. */
+import { useState } from 'react';
+
+/** Contrôles avant dépôt avec filtre par menu déroulant. */
 export default function ChecksPanel({ issues }) {
+  const [filter, setFilter] = useState('all');
   const blocking = issues.filter((i) => i.level === 'error').length;
+
+  const filtered =
+    filter === 'error'
+      ? issues.filter((i) => i.level === 'error')
+      : filter === 'warning'
+        ? issues.filter((i) => i.level === 'warning')
+        : issues;
 
   return (
     <section className="panel">
@@ -11,13 +21,21 @@ export default function ChecksPanel({ issues }) {
         </span>
       </header>
       <div className="panel__body">
-        {issues.length === 0 && (
+        <div className="dropdown">
+          <label htmlFor="issue-filter">Filtrer :</label>
+          <select id="issue-filter" value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option value="all">Tous</option>
+            <option value="error">Erreurs</option>
+            <option value="warning">Avertissements</option>
+          </select>
+        </div>
+        {filtered.length === 0 && (
           <div className="check check--ok">
             <b>OK</b>
             <span>Tous les contrôles passent.</span>
           </div>
         )}
-        {issues.map((issue, index) => (
+        {filtered.map((issue, index) => (
           <div key={index} className={`check check--${issue.level}`}>
             <b>{issue.level === 'error' ? 'Bloquant' : 'À vérifier'}</b>
             <span>{issue.message}</span>
