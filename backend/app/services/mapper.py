@@ -76,7 +76,7 @@ def commercial_description_from_goods(goods_lines: list[str]) -> str:
     return re.sub(r"\s+", " ", text).strip() if text else ""
 
 
-def _build_bol(index: int, raw: RawBol, options: ParseOptions) -> BolSegment:
+def _build_bol(index: int, raw: RawBol, options: ParseOptions, country_of_origin: str = "") -> BolSegment:
     exporter_name, exporter_address = split_name_address(raw.fields.get("SH"), options.clean_addresses)
     consignee_name, consignee_address = split_name_address(raw.fields.get("CO"), options.clean_addresses)
     notify_name, notify_address = split_name_address(raw.fields.get("NF"), options.clean_addresses)
@@ -132,12 +132,14 @@ def _build_bol(index: int, raw: RawBol, options: ParseOptions) -> BolSegment:
         vehicle_models=list(raw.vehicle_models),
         hs_codes=list(raw.hs_codes),
         hs_commercial_descriptions=[commercial_description_from_goods(raw.goods_lines)] * len(raw.hs_codes) if raw.hs_codes else [],
+        country_of_origin=country_of_origin,
     )
 
 
 def to_model(manifest: RawManifest, options: ParseOptions) -> ManifestModel:
     meta = manifest.meta
-    bols = [_build_bol(i, raw, options) for i, raw in enumerate(manifest.bols)]
+    country_of_origin = options.country_codes.get((meta.get("flag") or "").upper(), "")
+    bols = [_build_bol(i, raw, options, country_of_origin) for i, raw in enumerate(manifest.bols)]
 
     computed_packages = sum(b.packages for b in bols)
     computed_mass = sum(b.gross_mass for b in bols)
