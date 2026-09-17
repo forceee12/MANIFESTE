@@ -54,6 +54,16 @@ export default function BolCard({ bol, index, onChange }) {
             <Field label="Désignation des marchandises" type="textarea" rows={6} wide {...bind('goods_description')} />
           </div>
 
+          {(bol.vehicle_make || bol.vehicle_models.length > 0) && (
+            <>
+              <h3 className="sub">Véhicule</h3>
+              <div className="grid">
+                <Field label="Marque" value={bol.vehicle_make} onChange={() => {}} />
+                <Field label="Modèles" value={bol.vehicle_models.join(', ')} onChange={() => {}} />
+              </div>
+            </>
+          )}
+
           <h3 className="sub">Fret</h3>
           <div className="grid">
             <Field label="Valeur du fret" type="number" {...bind('freight_value')} />
