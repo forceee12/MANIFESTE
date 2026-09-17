@@ -95,6 +95,11 @@ def test_xml_structure(model):
     assert xml.startswith('<?xml version="1.0" encoding="UTF-8"?>')
     assert xml.count("<Bol_segment>") == 10
     assert xml.count("<Goods_segment>") == 10
+    assert xml.count("<HS_Compliance>") == 10
+    assert xml.count("<HS_code>") == 5
+    assert "<HS_code>8703.23</HS_code>" in xml
+    assert "<HS_code>8702.10</HS_code>" in xml
+    assert "<HS_code>8704.21</HS_code>" in xml
     assert "<Freight_value>61199.29</Freight_value>" in xml
     assert "<Total_gross_mass>235225</Total_gross_mass>" in xml
     assert xml_file_name(model) == "CATTLEYA_ACE_0112A.XML"

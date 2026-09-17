@@ -38,6 +38,8 @@ VEHICLE_MAKE_RE = re.compile(r"([A-Z]+)\s+VEHICLES?", re.I)
 MODEL_SECTION_RE = re.compile(r"MODEL\s*UNIT\(S\)", re.I)
 MODEL_CODE_RE = re.compile(r"\b([A-Z0-9]{4,}-?[A-Z0-9]{1,})\b")
 HS_RE = re.compile(r"\b(\d{4}\.\d{2}(?:/\d{4}\.\d{2})*)\b")
+HS_RE_RAW = re.compile(r"\b(87\d{4})\b")
+HS_LINE_RE = re.compile(r"H\.?\s*S\.?\s*(CODE|:)", re.I)
 
 GRAND_BAND = 16.0  # hauteur, en points, de la bande « GRAND TOTAL »
 
@@ -72,20 +74,20 @@ class Charge:
 def _extract_hs_codes(goods_lines: list[str]) -> list[str]:
     codes: list[str] = []
     for line in goods_lines:
-        if not re.search(r"H\.?\s*S\.?\s*(CODE|:)", line, re.I):
+        if not HS_LINE_RE.search(line):
             continue
         for token in line.split():
-            match = HS_RE.match(token)
+            match = HS_RE.search(token) or HS_RE_RAW.search(token)
             if match and match.group(1) not in codes:
                 codes.append(match.group(1))
         idx = goods_lines.index(line)
         for next_line in goods_lines[idx + 1 :]:
-            if re.search(r"H\.?\s*S\.?\s*(CODE|:)", next_line, re.I) or re.search(r"\bVIN\b", next_line, re.I):
+            if HS_LINE_RE.search(next_line) or re.search(r"\bVIN\b", next_line, re.I):
                 break
             if not next_line.strip() or re.fullmatch(r"[-\s]+", next_line):
                 continue
             for token in next_line.split():
-                match = HS_RE.match(token)
+                match = HS_RE.search(token) or HS_RE_RAW.search(token)
                 if match and match.group(1) not in codes:
                     codes.append(match.group(1))
     return codes
