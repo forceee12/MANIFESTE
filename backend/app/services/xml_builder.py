@@ -91,11 +91,18 @@ def _bol_block(bol: BolSegment) -> list[str]:
         tag("Num_of_ctn_for_this_bol", bol.containers or 0, "      "),
         "    </Goods_segment>",
         "",
+        "    <Value_segment>",
+        "      <Freight_segment>",
+        tag("Freight_value", fmt_money(bol.freight_value), "        "),
+        tag("Freight_currency", bol.freight_currency, "        "),
+        "      </Freight_segment>",
+        "    </Value_segment>",
+        "",
     ]
     for vin in bol.vins:
         vehicle_lines = ["    <Vehicle_segment>", tag("Vin", vin, "      ")]
         if bol.vehicle_make:
-            vehicle_lines.append(tag("Make", bol.vehicle_make, "      "))
+            vehicle_lines.append(tag("Mark", bol.vehicle_make, "      "))
         if len(bol.vehicle_models) == 1:
             vehicle_lines.append(tag("Model", bol.vehicle_models[0], "      "))
         elif bol.vehicle_models:
@@ -105,13 +112,6 @@ def _bol_block(bol: BolSegment) -> list[str]:
     if bol.vins:
         lines.append("")
     lines += [
-        "    <Value_segment>",
-        "      <Freight_segment>",
-        tag("Freight_value", fmt_money(bol.freight_value), "        "),
-        tag("Freight_currency", bol.freight_currency, "        "),
-        "      </Freight_segment>",
-        "    </Value_segment>",
-        "",
         "    <Location>",
         tag("Location_code", bol.location_code, "      "),
         tag("Location_info", bol.location_info, "      "),
