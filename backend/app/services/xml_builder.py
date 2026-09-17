@@ -109,7 +109,7 @@ def _bol_block(bol: BolSegment) -> list[str]:
         lines.append(tag("HS_code", hs_code, "      "))
         desc = bol.hs_commercial_descriptions[idx] if idx < len(bol.hs_commercial_descriptions) else ""
         lines.append(tag("Commercial_description", desc, "      "))
-        lines.append(tag("Number_of_packages", bol.packages or 0, "      "))
+        lines.append(tag("Package_type_code", bol.package_type_code or "", "      "))
     lines += [
         "    </HS_Compliance>",
         "  </Bol_segment>",

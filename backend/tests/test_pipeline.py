@@ -100,9 +100,9 @@ def test_xml_structure(model):
     assert xml.count("<HS_code>") == 5
     assert xml.count("<Commercial_description>") == 5
     hs_blocks = re.findall(r'<HS_Compliance>.*?</HS_Compliance>', xml, re.S)
-    hs_packages_blocks = [block for block in hs_blocks if '<Number_of_packages>' in block]
+    hs_packages_blocks = [block for block in hs_blocks if '<Package_type_code>' in block]
     assert len(hs_packages_blocks) == 3
-    total_hs_packages = sum(block.count('<Number_of_packages>') for block in hs_blocks)
+    total_hs_packages = sum(block.count('<Package_type_code>') for block in hs_blocks)
     assert total_hs_packages == 5
     assert xml.count("<HS_code>8703.23</HS_code>") == 1
     assert xml.count("<HS_code>8702.10</HS_code>") == 1
