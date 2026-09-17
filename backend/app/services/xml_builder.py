@@ -105,8 +105,10 @@ def _bol_block(bol: BolSegment) -> list[str]:
         "    <Authorize/>",
         "    <HS_Compliance>",
     ]
-    for hs_code in bol.hs_codes:
+    for idx, hs_code in enumerate(bol.hs_codes):
         lines.append(tag("HS_code", hs_code, "      "))
+        desc = bol.hs_commercial_descriptions[idx] if idx < len(bol.hs_commercial_descriptions) else ""
+        lines.append(tag("Commercial_description", desc, "      "))
     lines += [
         "    </HS_Compliance>",
         "  </Bol_segment>",

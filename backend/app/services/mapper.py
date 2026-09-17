@@ -61,6 +61,21 @@ def compact_description(goods_lines: list[str], vins: list[str]) -> str:
     return text
 
 
+def commercial_description_from_goods(goods_lines: list[str]) -> str:
+    """Extrait la description commerciale sans VIN ni détails techniques."""
+    head: list[str] = []
+    stop_markers = ("VIN", "CHASSIS", "MODEL", "HS CODE", "H.S", "UNIT(", "**TOTAL**", "VIN NO", "FREIGHT", "PREPAID", "NUMBER(S)", "IDENTIFICATION")
+    for line in goods_lines:
+        upper = line.upper()
+        if any(m in upper for m in stop_markers):
+            break
+        if re.fullmatch(r"[-\s]+", line):
+            continue
+        head.append(line)
+    text = "\n".join(head)
+    return re.sub(r"\s+", " ", text).strip() if text else ""
+
+
 def _build_bol(index: int, raw: RawBol, options: ParseOptions) -> BolSegment:
     exporter_name, exporter_address = split_name_address(raw.fields.get("SH"), options.clean_addresses)
     consignee_name, consignee_address = split_name_address(raw.fields.get("CO"), options.clean_addresses)
@@ -116,6 +131,7 @@ def _build_bol(index: int, raw: RawBol, options: ParseOptions) -> BolSegment:
         vehicle_make=raw.vehicle_make,
         vehicle_models=list(raw.vehicle_models),
         hs_codes=list(raw.hs_codes),
+        hs_commercial_descriptions=[commercial_description_from_goods(raw.goods_lines)] * len(raw.hs_codes) if raw.hs_codes else [],
     )
 
 
