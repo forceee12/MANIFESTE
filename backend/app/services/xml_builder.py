@@ -103,7 +103,12 @@ def _bol_block(bol: BolSegment) -> list[str]:
         tag("Location_info", bol.location_info, "      "),
         "    </Location>",
         "    <Authorize/>",
-        "    <HS_Compliance/>",
+        "    <HS_Compliance>",
+    ]
+    for hs_code in bol.hs_codes:
+        lines.append(tag("HS_code", hs_code, "      "))
+    lines += [
+        "    </HS_Compliance>",
         "  </Bol_segment>",
     ]
     return lines

@@ -115,6 +115,7 @@ def _build_bol(index: int, raw: RawBol, options: ParseOptions) -> BolSegment:
         source_pages=list(raw.pages),
         vehicle_make=raw.vehicle_make,
         vehicle_models=list(raw.vehicle_models),
+        hs_codes=list(raw.hs_codes),
     )
 
 

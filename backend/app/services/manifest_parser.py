@@ -37,6 +37,7 @@ VIN_MARKER_RE = re.compile(r"^VIN\s*(NO\.?|NUMBER|:)?\s*:?$", re.I)
 VEHICLE_MAKE_RE = re.compile(r"([A-Z]+)\s+VEHICLES?", re.I)
 MODEL_SECTION_RE = re.compile(r"MODEL\s*UNIT\(S\)", re.I)
 MODEL_CODE_RE = re.compile(r"\b([A-Z0-9]{4,}-?[A-Z0-9]{1,})\b")
+HS_RE = re.compile(r"\b(\d{4}\.\d{2}(?:/\d{4}\.\d{2})*)\b")
 
 GRAND_BAND = 16.0  # hauteur, en points, de la bande « GRAND TOTAL »
 
@@ -66,6 +67,28 @@ class Charge:
     label: str
     amount: float
     collect: bool = False
+
+
+def _extract_hs_codes(goods_lines: list[str]) -> list[str]:
+    codes: list[str] = []
+    for line in goods_lines:
+        if not re.search(r"H\.?\s*S\.?\s*(CODE|:)", line, re.I):
+            continue
+        for token in line.split():
+            match = HS_RE.match(token)
+            if match and match.group(1) not in codes:
+                codes.append(match.group(1))
+        idx = goods_lines.index(line)
+        for next_line in goods_lines[idx + 1 :]:
+            if re.search(r"H\.?\s*S\.?\s*(CODE|:)", next_line, re.I) or re.search(r"\bVIN\b", next_line, re.I):
+                break
+            if not next_line.strip() or re.fullmatch(r"[-\s]+", next_line):
+                continue
+            for token in next_line.split():
+                match = HS_RE.match(token)
+                if match and match.group(1) not in codes:
+                    codes.append(match.group(1))
+    return codes
 
 
 def _extract_vehicle_info(goods_lines: list[str]) -> tuple[str, list[str]]:
@@ -113,6 +136,7 @@ class PageResult:
     grand: dict = field(default_factory=dict)
     vehicle_make: str = ""
     vehicle_models: list[str] = field(default_factory=list)
+    hs_codes: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -136,6 +160,7 @@ class RawBol:
     currency: str | None = None
     vehicle_make: str = ""
     vehicle_models: list[str] = field(default_factory=list)
+    hs_codes: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -287,6 +312,7 @@ def parse_page(page: Page) -> PageResult:
         result.goods_lines.append(text)
 
     result.vehicle_make, result.vehicle_models = _extract_vehicle_info(result.goods_lines)
+    result.hs_codes = _extract_hs_codes(result.goods_lines)
 
     # --- colonnes chiffrées ---
     right_words = [w for w in body_words if w.x >= 260]
@@ -395,6 +421,7 @@ def parse_manifest(pages: list[Page]) -> RawManifest:
                 delivery_port=result.head.get("place_of_delivery", ""),
                 vehicle_make=result.vehicle_make,
                 vehicle_models=list(result.vehicle_models),
+                hs_codes=list(result.hs_codes),
             )
             manifest.bols.append(current)
         if current is None:
@@ -412,6 +439,9 @@ def parse_manifest(pages: list[Page]) -> RawManifest:
         for model in result.vehicle_models:
             if model not in current.vehicle_models:
                 current.vehicle_models.append(model)
+        for hs_code in result.hs_codes:
+            if hs_code not in current.hs_codes:
+                current.hs_codes.append(hs_code)
         if result.unit_count is not None:
             current.packages = result.unit_count
         if result.total_units is not None:
