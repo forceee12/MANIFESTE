@@ -7,6 +7,7 @@ valeurs attendues : toute régression du parseur les fait tomber.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -98,9 +99,14 @@ def test_xml_structure(model):
     assert xml.count("<HS_Compliance>") == 10
     assert xml.count("<HS_code>") == 5
     assert xml.count("<Commercial_description>") == 5
-    assert "<HS_code>8703.23</HS_code>" in xml
-    assert "<HS_code>8702.10</HS_code>" in xml
-    assert "<HS_code>8704.21</HS_code>" in xml
+    hs_blocks = re.findall(r'<HS_Compliance>.*?</HS_Compliance>', xml, re.S)
+    hs_packages_blocks = [block for block in hs_blocks if '<Number_of_packages>' in block]
+    assert len(hs_packages_blocks) == 3
+    total_hs_packages = sum(block.count('<Number_of_packages>') for block in hs_blocks)
+    assert total_hs_packages == 5
+    assert xml.count("<HS_code>8703.23</HS_code>") == 1
+    assert xml.count("<HS_code>8702.10</HS_code>") == 1
+    assert xml.count("<HS_code>8704.21</HS_code>") == 1
     assert "<Commercial_description>30 UNITS NEW MAZDA VEHICLES</Commercial_description>" in xml
     assert "<Freight_value>61199.29</Freight_value>" in xml
     assert "<Total_gross_mass>235225</Total_gross_mass>" in xml
