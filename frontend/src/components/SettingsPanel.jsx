@@ -59,6 +59,17 @@ export default function SettingsPanel({ options, onChange, onReset }) {
             <Field label="Code emplacement" mono value={options.location_code} onChange={set('location_code')} />
             <Field label="Emplacement" value={options.location_info} onChange={set('location_info')} />
             <Field label="Marques" value={options.shipping_marks} onChange={set('shipping_marks')} />
+            <label className="field" style={{display:'flex',alignItems:'center',gap:8,marginTop:4}}>
+              <input
+                type="checkbox"
+                checked={options.use_nm_for_marks}
+                onChange={(e) => onChange({ ...options, use_nm_for_marks: e.target.checked })}
+              />
+              <span>
+                <span className="field__label" style={{margin:0}}>Forcer N/M pour les marques</span>
+                <span className="field__hint" style={{margin:0}}>Si activé, ignore les marques du PDF.</span>
+              </span>
+            </label>
             <Field
               label="Valeur du fret"
               type="select"

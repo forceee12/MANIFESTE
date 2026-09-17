@@ -35,7 +35,7 @@ class ParseOptions(BaseModel):
     location_info: str = "TPH VEHICULES FER TOAMASINA"
 
     shipping_marks: str = "N/M"
-    use_nm_for_marks: bool = True
+    use_nm_for_marks: bool = False
     clean_addresses: bool = True
     description_mode: Literal["compact", "full"] = "compact"
     freight_mode: Literal["base", "total"] = "base"

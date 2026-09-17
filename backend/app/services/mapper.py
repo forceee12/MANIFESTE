@@ -66,9 +66,9 @@ def _build_bol(index: int, raw: RawBol, options: ParseOptions) -> BolSegment:
     consignee_name, consignee_address = split_name_address(raw.fields.get("CO"), options.clean_addresses)
     notify_name, notify_address = split_name_address(raw.fields.get("NF"), options.clean_addresses)
 
-    marks = options.shipping_marks
-    if not options.use_nm_for_marks:
-        marks = "\n".join(raw.fields.get("MN") or []).strip() or options.shipping_marks
+    marks = "\n".join(raw.fields.get("MN") or []).strip() or options.shipping_marks
+    if options.use_nm_for_marks:
+        marks = options.shipping_marks
 
     if options.freight_mode == "total":
         freight = raw.freight_total if raw.freight_total is not None else raw.freight_base
