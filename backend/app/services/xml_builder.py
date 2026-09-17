@@ -116,6 +116,8 @@ def _bol_block(bol: BolSegment) -> list[str]:
         tag("Location_code", bol.location_code, "      "),
         tag("Location_info", bol.location_info, "      "),
         "    </Location>",
+        "    <Authorize/>",
+        "    <HS_Compliance/>",
         "  </Bol_segment>",
     ]
     return lines
