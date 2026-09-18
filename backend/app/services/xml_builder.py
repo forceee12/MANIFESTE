@@ -103,14 +103,15 @@ def _bol_block(bol: BolSegment) -> list[str]:
         tag("Location_info", bol.location_info, "      "),
         "    </Location>",
         "    <Authorize/>",
-        "    <HS_Compliance>",
     ]
-    for idx, hs_code in enumerate(bol.hs_codes):
-        lines.append(tag("HS_code", hs_code, "      "))
-        desc = bol.hs_commercial_descriptions[idx] if idx < len(bol.hs_commercial_descriptions) else ""
-        lines.append(tag("Commercial_description", desc, "      "))
+    if bol.hs_codes:
+        lines.append("    <HS_Compliance>")
+        for idx, hs_code in enumerate(bol.hs_codes):
+            lines.append(tag("HS_code", hs_code, "      "))
+            desc = bol.hs_commercial_descriptions[idx] if idx < len(bol.hs_commercial_descriptions) else ""
+            lines.append(tag("Commercial_description", desc, "      "))
+        lines.append("    </HS_Compliance>")
     lines += [
-        "    </HS_Compliance>",
         "  </Bol_segment>",
     ]
     return lines
