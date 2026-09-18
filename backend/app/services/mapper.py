@@ -130,8 +130,8 @@ def _build_bol(index: int, raw: RawBol, options: ParseOptions, country_of_origin
         source_pages=list(raw.pages),
         vehicle_make=raw.vehicle_make,
         vehicle_models=list(raw.vehicle_models),
-        hs_codes=list(raw.hs_codes),
-        hs_commercial_descriptions=[commercial_description_from_goods(raw.goods_lines)] * len(raw.hs_codes) if raw.hs_codes else [],
+        hs_codes=list(raw.hs_codes) or ([options.default_hs_code] if options.default_hs_code else []),
+        hs_commercial_descriptions=[commercial_description_from_goods(raw.goods_lines)] * len(raw.hs_codes or ([options.default_hs_code] if options.default_hs_code else [])) if (raw.hs_codes or options.default_hs_code) else [],
         country_of_origin=country_of_origin,
     )
 

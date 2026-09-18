@@ -59,6 +59,7 @@ export default function SettingsPanel({ options, onChange, onReset }) {
             <Field label="Code emplacement" mono value={options.location_code} onChange={set('location_code')} />
             <Field label="Emplacement" value={options.location_info} onChange={set('location_info')} />
             <Field label="Marques" value={options.shipping_marks} onChange={set('shipping_marks')} />
+            <Field label="Code SH par défaut" mono value={options.default_hs_code} onChange={set('default_hs_code')} hint="Utilisé si le PDF ne contient pas de code SH." />
             <label className="field" style={{display:'flex',alignItems:'center',gap:8,marginTop:4}}>
               <input
                 type="checkbox"

@@ -40,6 +40,7 @@ class ParseOptions(BaseModel):
     description_mode: Literal["compact", "full"] = "compact"
     freight_mode: Literal["base", "total"] = "base"
     departure_date_source: Literal["print", "sail"] = "print"
+    default_hs_code: str = "8703"
 
     port_codes: dict[str, str] = Field(default_factory=lambda: dict(PORT_CODES))
     country_codes: dict[str, str] = Field(default_factory=lambda: dict(COUNTRY_CODES))
