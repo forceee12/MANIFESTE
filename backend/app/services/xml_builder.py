@@ -109,11 +109,6 @@ def _bol_block(bol: BolSegment) -> list[str]:
         lines.append(tag("HS_code", hs_code, "      "))
         desc = bol.hs_commercial_descriptions[idx] if idx < len(bol.hs_commercial_descriptions) else ""
         lines.append(tag("Commercial_description", desc, "      "))
-        lines.append(tag("Number_of_packages", bol.packages or 0, "      "))
-        lines.append(tag("Gross_mass", fmt_decimal(bol.gross_mass), "      "))
-        lines.append(tag("Volume_in_cubic_meters", fmt_decimal(bol.volume), "      "))
-        lines.append(tag("Package_type_code", bol.package_type_code or "", "      "))
-        lines.append(tag("Country_of_origin", bol.country_of_origin or "", "      "))
     lines += [
         "    </HS_Compliance>",
         "  </Bol_segment>",

@@ -100,7 +100,6 @@ class BolSegment(BaseModel):
     vehicle_models: list[str] = Field(default_factory=list)
     hs_codes: list[str] = Field(default_factory=list)
     hs_commercial_descriptions: list[str] = Field(default_factory=list)
-    country_of_origin: str = ""
 
     freight_value: float | None = None
     freight_currency: str = "USD"
