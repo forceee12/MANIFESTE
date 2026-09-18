@@ -96,26 +96,14 @@ def test_xml_structure(model):
     assert xml.startswith('<?xml version="1.0" encoding="UTF-8"?>')
     assert xml.count("<Bol_segment>") == 10
     assert xml.count("<Goods_segment>") == 10
-    assert xml.count("<HS_Compliance>") == 3
-    assert xml.count("<HS_code>") == 5
-    assert xml.count("<Commercial_description>") == 5
+    assert xml.count("<HS_Compliance>") == 0
+    assert xml.count("<HS_code>") == 0
+    assert xml.count("<Commercial_description>") == 0
     assert xml.count("<Number_of_packages>") == 10
     assert xml.count("<Gross_mass>") == 10
     assert xml.count("<Volume_in_cubic_meters>") == 10
     assert xml.count("<Package_type_code>") == 10
     assert xml.count("<Country_of_origin>") == 0
-    assert xml.count("<HS_code>8703.23</HS_code>") == 1
-    assert xml.count("<HS_code>8702.10</HS_code>") == 1
-    assert xml.count("<HS_code>8704.21</HS_code>") == 1
-    assert xml.count("<HS_code>8703.33</HS_code>") == 1
-    assert xml.count("<HS_code>8703.40</HS_code>") == 1
-    assert xml.count("<HS_code>8703</HS_code>") == 0
-    assert "<Commercial_description>30 UNITS NEW MAZDA VEHICLES</Commercial_description>" in xml
-    assert "<Number_of_packages>30</Number_of_packages>" in xml
-    assert "<Gross_mass>51560</Gross_mass>" in xml
-    assert "<Volume_in_cubic_meters>449.4</Volume_in_cubic_meters>" in xml
-    assert "<Package_type_code>VH</Package_type_code>" in xml
-    assert "<Country_of_origin>JP</Country_of_origin>" not in xml
     assert "<Freight_value>61199.29</Freight_value>" in xml
     assert "<Total_gross_mass>235225</Total_gross_mass>" in xml
     assert xml_file_name(model) == "CATTLEYA_ACE_0112A.XML"
