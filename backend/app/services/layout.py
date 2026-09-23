@@ -74,10 +74,10 @@ def in_band(x: float, band: str) -> bool:
 
 
 def to_number(text: str | None) -> float | None:
-    """Convertit « 51560.000 », « -9509.04 » ou « 235 889.6 » en float, sinon None."""
+    """Convertit « 51560.000 », « -9509.04 », « 235 889.6 » ou « 235 889,6 » en float, sinon None."""
     if text is None:
         return None
-    cleaned = str(text).replace(",", "").replace(" ", "").strip()
+    cleaned = str(text).replace(",", ".").replace(" ", "").strip()
     return float(cleaned) if _NUMBER_RE.match(cleaned) else None
 
 
