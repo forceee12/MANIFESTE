@@ -26,14 +26,16 @@ def tag(name: str, value, indent: str) -> str:
 
 
 def fmt_decimal(value) -> str:
-    """Nombre sans zéros inutiles : 51560.0 -> « 51560 », 449.400 -> « 449.4 »."""
+    """Nombre sans zéros inutiles : 51560.0 -> « 51560 », 449.400 -> « 449.4 », 235889.620 -> « 235889.62 »."""
     if value is None or value == "":
         return ""
     try:
         number = float(value)
     except (TypeError, ValueError):
         return str(value)
-    return f"{round(number, 3):g}"
+    rounded = round(number, 3)
+    text = f"{rounded:.3f}".rstrip("0").rstrip(".")
+    return text if text else "0"
 
 
 def fmt_money(value) -> str:
