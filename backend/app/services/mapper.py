@@ -34,12 +34,38 @@ def _clean_line(text: str) -> str:
     return re.sub(r"\s+", " ", re.sub(r"\s*-\s*$", "", text)).strip()
 
 
+def _is_address_line(line: str) -> bool:
+    if not line or not line.strip():
+        return False
+    upper = line.upper()
+    if re.match(r"^\d+\s", line):
+        return True
+    if any(upper.startswith(k) for k in [
+        "MADE IN", "C/NO.", "C/ NO", "VIA ", "ATTN:", "FAX:", "TEL:", "EMAIL:", "WWW.", "HTTP", "HTTPS", "NO.", "NO "
+    ]):
+        return True
+    if re.search(r"\b\d{5}\b", line):
+        return True
+    if upper.startswith("BP ") or upper.startswith("BP,"):
+        return True
+    return False
+
+
 def split_name_address(lines: list[str] | None, clean: bool) -> tuple[str, str]:
     values = [_clean_line(v) for v in (lines or [])] if clean else list(lines or [])
     values = [v for v in values if v.strip()]
     if not values:
         return "", ""
-    return values[0].strip(), "\n".join(values[1:]).strip()
+    name_parts: list[str] = [values[0]]
+    address_parts: list[str] = []
+    for line in values[1:]:
+        if _is_address_line(line):
+            address_parts.append(line)
+        elif address_parts:
+            address_parts.append(line)
+        else:
+            name_parts.append(line)
+    return " ".join(name_parts).strip(), "\n".join(address_parts).strip()
 
 
 def compact_description(goods_lines: list[str], vins: list[str]) -> str:
@@ -130,8 +156,8 @@ def _build_bol(index: int, raw: RawBol, options: ParseOptions) -> BolSegment:
         source_pages=list(raw.pages),
         vehicle_make=raw.vehicle_make,
         vehicle_models=list(raw.vehicle_models),
-        hs_codes=list(raw.hs_codes) or ([options.default_hs_code] if options.default_hs_code else []),
-        hs_commercial_descriptions=[commercial_description_from_goods(raw.goods_lines)] * len(raw.hs_codes or ([options.default_hs_code] if options.default_hs_code else [])) if (raw.hs_codes or options.default_hs_code) else [],
+        hs_codes=list(raw.hs_codes),
+        hs_commercial_descriptions=[commercial_description_from_goods(raw.goods_lines)] * len(raw.hs_codes) if raw.hs_codes else [],
     )
 
 

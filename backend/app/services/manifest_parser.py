@@ -56,7 +56,12 @@ def vins_in_line(line: str) -> list[str]:
     six chiffres, sinon « MAY 2026 PRODUCTION » passerait pour un châssis.
     """
     tokens = line.split()
-    found = [t for t in tokens if is_vin(t)]
+    found: list[str] = []
+    for token in tokens:
+        for part in token.split(","):
+            cleaned = part.strip()
+            if is_vin(cleaned):
+                found.append(cleaned)
     if not found and len(tokens) == 2:
         joined = "".join(tokens)
         if is_vin(joined) and re.search(r"\d{6}$", joined) and sum(c.isdigit() for c in joined) >= 6:
