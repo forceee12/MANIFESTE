@@ -48,7 +48,25 @@ def _is_address_line(line: str) -> bool:
         return True
     if upper.startswith("BP ") or upper.startswith("BP,"):
         return True
+    if re.search(r"\b\d+[-\/]\d+\b", line) and re.search(r"(?:STREET|RUE|AVENUE|AV\.|BLVD|BOULEVARD|ROAD|RD|LANE|LN|DRIVE|DR|WAY|PLACE|PLZ|CHOME|CHO|DORI|MACHI|BIS|TER|IMPASSE|CITE|QUARTIER|VILA|IMMEUBLE|TOWER|BUILDING|BATIMENT|RESIDENCE|FLOOR|ETAGE|CASE|BP|B\.P\.|TAKASHIMA|SHIBAURA|YOKOHAMA|KANAGAWA|TOKYO|OSAKA|KYOTO|NAGOYA)", line, re.I):
+        return True
     return False
+
+
+_ADDRESS_SPLIT_RE = re.compile(
+    r"(?:^|\s+|[,.])"
+    r"((?:\d+[-\/]\d+|\d+)\s*[,.]?\s*(?:TAKASHIMA|SHIBAURA|CHOME|CHO|DORI|MACHI|STREET|RUE|AVENUE|AV\.|BLVD|BOULEVARD|ROAD|RD|LANE|LN|DRIVE|DR|WAY|PLACE|PLZ|BIS|TER|IMPASSE|CITE|QUARTIER|VILA|IMMEUBLE|TOWER|BUILDING|BATIMENT|RESIDENCE|FLOOR|ETAGE|CASE|BP|B\.P\.|YOKOHAMA|KANAGAWA|TOKYO|OSAKA|KYOTO|NAGOYA)[^,]*?)",
+    re.I,
+)
+
+
+def _split_embedded_address(text: str) -> tuple[str, str]:
+    """Essaie de séparer nom et adresse sur une seule ligne."""
+    match = _ADDRESS_SPLIT_RE.search(text)
+    if match:
+        split_pos = match.start(1)
+        return text[:split_pos].strip(), text[split_pos:].strip()
+    return text.strip(), ""
 
 
 def split_name_address(lines: list[str] | None, clean: bool) -> tuple[str, str]:
@@ -56,10 +74,21 @@ def split_name_address(lines: list[str] | None, clean: bool) -> tuple[str, str]:
     values = [v for v in values if v.strip()]
     if not values:
         return "", ""
-    name_parts: list[str] = [values[0]]
+    if len(values) == 1:
+        text = values[0]
+        name, address = _split_embedded_address(text)
+        if address:
+            return name, address
+        return text, ""
+    name_parts: list[str] = []
     address_parts: list[str] = []
-    for line in values[1:]:
-        if _is_address_line(line):
+    for line in values:
+        if not name_parts:
+            name_only, address_only = _split_embedded_address(line)
+            name_parts.append(name_only)
+            if address_only:
+                address_parts.append(address_only)
+        elif _is_address_line(line):
             address_parts.append(line)
         elif address_parts:
             address_parts.append(line)
